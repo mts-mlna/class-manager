@@ -1,0 +1,1797 @@
+*{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+@font-face {
+    font-family: 'TTNorms';
+    src: url(../assets/TTNormsProVariable.ttf);
+}
+
+.custom-select {
+  position: relative;
+  width: 200px;
+  font-family: sans-serif;
+}
+
+.select-button {
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+  width: 100%;
+  background: #FF4D50;
+  border: none;
+  border-right: 2px solid #111;
+  border-radius: 5px 0 0 5px;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.arrow {
+  margin-left: 8px;
+  margin-top: 8px;
+}
+
+@keyframes select-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.select-options {
+  position: absolute;
+  top: 110%;
+  width: 100%;
+  background: #FF4D50;
+  border: 2px solid black;
+  border-radius: 6px;
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+  z-index: 10;
+  animation: select-enter 150ms ease-out;
+  transform-origin: top center;
+}
+
+.option {
+  padding: 10px;
+  cursor: pointer;
+  margin-left: 5px;
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.option:hover {
+  outline: 2px solid #111;
+  border-radius: 5px;
+}
+
+.select-button.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* Encabezado */
+
+header{
+    height: 80px;
+    background: #F9F9F9;
+    padding: 0 50px;
+    border-bottom: 4px solid #111;
+}
+
+.navigation{
+    font-family: 'TTNorms', sans-serif;
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+    align-items: center;
+}
+
+.navigation ul{
+    height: 100%;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.navigation ul li{
+    display: flex;
+    align-items: center;
+    list-style: none;
+    height: 100%;
+}
+
+.logo{
+    color: #111;
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #FF4D50;
+    border-left: 2px solid #111;
+    border-right: 2px solid #111;
+}
+
+.logo img{
+    height: 35px;
+}
+
+.navigation ul li a p{
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: capitalize;
+    color: #111;
+    border-radius: 6.4px;
+}
+
+.navigation ul li a{
+    text-decoration: none;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.navigation ul li a:hover .underline{
+    background: #FF4D50;
+    position: absolute;
+    bottom: 14px;
+    height: 4px;
+    border-radius: 2px;
+    width: 100%;
+}
+
+.sidebar{
+  font-family: 'TTNorms', sans-serif;
+  font-weight: bold;
+  position: fixed;
+  top: 0;
+  right: -250px;
+  width: 250px;
+  height: 100%;
+  background: #1f1f1f;
+  color: white;
+  transition: right 0.3s ease;
+  z-index: 1000;
+  padding-top: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between !important;
+  border-left: 4px solid #000;
+}
+
+.sidebar.open{
+  right: 0;
+}
+
+.sidebar-content{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 12px;
+  padding: 10px 20px;
+  justify-content: space-between;
+}
+
+.sidebar-content ul li{
+  list-style-type: none;
+  justify-content: left;
+  display: flex;
+  width: 100%;
+}
+
+.sidebar-content ul li a{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  width: 100%;
+  color: #F9F9F9;
+  text-decoration: none;
+  font-size: 18px;
+  padding: 10px 20px;
+  border-radius: 6.4px;
+}
+
+.sidebar-content a:hover {
+  background: #333;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 22px;
+  background: none;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.sidebar-content ul{
+  display: flex;
+  gap: 5px;
+  flex-direction: column;
+}
+
+.profile{
+  display: flex;
+  font-family: 'TTNorms', sans-serif;
+}
+
+.profile p{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.profile p div{
+  display: flex;
+  flex-direction: column;
+}
+
+.profile p div h1{
+  font-size: 20px;
+  line-height: 18px;
+  text-transform: uppercase;
+  font-weight: bold;
+  max-width: 145px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.profile p div p{
+  font-size: 12px;
+  font-weight: bold;
+  max-width: 130px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.profile p img{
+  height: 75px;
+  border-radius: 100px;
+  padding: 5px;
+}
+
+.action-buttons{
+  display: flex;
+  flex-direction: column;
+}
+
+.logout{
+    font-family: 'TTNorms', sans-serif;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  width: 100%;
+  color: #F9F9F9;
+  text-decoration: none;
+  font-size: 18px;
+  padding: 10px 20px;
+  border-radius: 6.4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.logout:hover{
+    background: #333;
+}
+
+.open-sidebar{
+    background: #F9F9F9;
+    border: 2px solid #111 !important;
+    padding: 8px 10px;
+    box-shadow: 4px 4px #111;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: box-shadow .1s ease, transform .1s ease;
+}
+
+.open-sidebar:active{
+    box-shadow: 0 0 #111;
+    transform: translate(4px, 4px);
+}
+
+/* Popup al presionar los botones */
+
+.popup-overlay {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.popup {
+    font-family: 'TTNorms', sans-serif;
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 25px;
+    animation: select-enter 150ms ease-out;
+  background: #FFE0E0;
+  padding: 20px;
+  border-radius: 10px;
+  width: 40%;
+  border: 2px solid #111;
+  box-shadow: 4px 4px #111;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.popup-buttons button {
+    font-family: 'TTNorms', sans-serif;
+    border: 2px solid #111;
+    box-shadow: 4px 4px #111;
+    font-weight: bold;
+    font-size: 16px;
+    transition: transform .1s ease, box-shadow .1s ease;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.popup-buttons button:active{
+    box-shadow: 0 0 4px;
+    transform: translate(4px, 4px);
+}
+
+.popup-confirm{
+    background: #FF4D50;
+}
+
+.popup-cancel{
+    background: #FFF;
+}
+
+.popup p{
+    line-height: 25px;
+}
+
+.popup h2{
+    font-weight: 700;
+}
+
+/* Tabla de profesores */
+
+.table-border{
+    display: flex;
+    justify-content: center;
+    max-height: 378px;
+    width: 90%;
+    overflow-y: auto;
+    border: 2px solid #111;
+    border-right: 4px solid #111;
+}
+
+::-webkit-scrollbar{
+    width: 16px;
+}
+
+::-webkit-scrollbar-track{
+    background: #FFF;
+    border-left: 4px solid #111;
+}
+
+::-webkit-scrollbar-thumb{
+    background: #111;
+}
+
+.table-center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.professor-table-assistance{
+    width: 100%;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    border-collapse: collapse;
+    background: #F9F9F9;
+}
+
+.professor-table-assistance thead{
+    color: #111;
+    text-align: left;
+}
+
+.professor-table-assistance thead tr{
+    outline: 2px solid #111;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.professor-table-assistance thead tr th{
+    padding: 10px;
+    background: #F9F9F9;
+    z-index: 100;
+}
+
+.professor-table-assistance tbody tr td{
+    padding: 10px;
+    border-bottom: 2px solid #111;
+}
+
+.professor-checkbox-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-top: 5px;
+}
+
+.professor-checkbox-wrapper input {
+  position: absolute;
+  opacity: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  z-index: 2;
+}
+
+.custom-checkbox {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #111;
+  background: #FFF;
+  pointer-events: none;
+  transition: background .1s ease;
+  margin-top: -4px;
+  z-index: 100;
+}
+
+.custom-checkbox::after {
+  content: "";
+  margin-left: -2px;
+  width: 20px;
+  height: 20px;
+  mask: url(../assets/check.svg);
+  background: black;
+  display: none;
+}
+
+.professor-checkbox-wrapper input:checked + .custom-checkbox {
+  background: #5294FF;
+}
+
+.professor-checkbox-wrapper input:checked + .custom-checkbox::after {
+  display: block;
+}
+
+.student-name-header button{
+    font-family: 'TTNorms', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    background: #5294FF;
+}
+
+.student-name-header button span{
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.table-actions{
+    display: flex;
+    margin-bottom: -1px;
+    align-items: center;
+    gap: 10px;
+}
+
+.dashboard-main{
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0 265px;
+    background-color: #FFE0E0;
+    background-image: linear-gradient(90deg,#8080804d 1px,#0000 0),linear-gradient(#80808090 1px,#0000 0);
+    background-size: 40px 40px;
+    overflow-y: hidden;
+}
+
+.search-center{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-inner{
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+}
+
+.search{
+    display: flex;
+    gap: 25px;
+    width: 50%;
+}
+
+.search input{
+    padding: 10px;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    width: 75%;
+}
+
+.search input:focus-within{
+    outline: 2px solid #FFF;
+    box-shadow: 0 0 0 4px #111;
+}
+
+.search button{
+    background: #5294FF;
+    width: 10%;
+    border: 2px solid #111;
+    border-radius: 5px;
+    transition: transform .1s ease;
+}
+
+.header-actions{
+    display: flex;
+    width: 50%;
+    justify-content: right;
+    gap: 25px;
+}
+
+.header-actions button{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 20%;
+    cursor: pointer;
+}
+
+.header-actions .erase-selection{
+    width: 35%;
+    background: #FF4D50;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+
+.header-actions .erase-selection:active{
+    box-shadow: 0 0 #111;
+    transform: translate(4px, 4px);
+}
+
+.table-actions button{
+    display: flex;
+    align-items: center;
+    margin-bottom: 2px;
+    gap: 5px;
+    padding: 5px 10px;
+    font-weight: bold;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+}
+
+.table-row-email{
+    display: block !important;
+    max-width: 100px;   /* O el ancho que necesites */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-row-phone{
+    display: block !important;
+    max-width: 100px;   /* O el ancho que necesites */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-row-name-surname{
+    display: block !important;
+    color: #111;
+    max-width: 85px;   /* O el ancho que necesites */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.present{
+    background: #04E17A;
+    border: 2px solid #111;
+    border-radius: 5px;
+    transition: background .1s ease;
+}
+
+.present:active{
+    background: #04c86d;
+}
+
+.absent{
+    background: #FF4D50;
+    border: 2px solid #111;
+    border-radius: 5px;
+    transition: background .1s ease;
+}
+
+.absent:active{
+    background: #A93335;
+}
+
+.options{
+    background: #5294FF;
+    border: 2px solid #111;
+    border-radius: 5px;
+}
+
+.absent{
+    background: #FF4D50;
+    font-family: 'TTNorms', sans-serif;
+    font-weight: bold;
+    font-size: 16px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+
+.absent:active{
+    box-shadow: 0 0 #111;
+    transform: translate(4px, 4px);
+}
+
+.save-changes{
+    background: #5294FF;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+
+.save-changes:active{
+    box-shadow: 0 0 #111;
+    transform: translate(4px, 4px);
+}
+
+.my-class-inner h1{
+    font-size: 47px;
+    letter-spacing: 2px;
+    font-weight: 800;
+    font-family: 'TTNorms', sans-serif;
+    text-transform: uppercase;
+    background: #F9F9F9;
+    border: 2px solid #111;
+    box-shadow: 4px 4px #111;
+    border-radius: 5px;
+}
+
+.my-class-inner{
+    display: flex;
+    gap: 10px;
+    flex-direction: row;
+    align-items: center;
+    width: 90%;
+    margin: auto;
+}
+
+.date-hour{
+    font-size: 16px;
+    font-family: 'TTNorms', sans-serif;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    font-weight: bold;
+    background: #F9F9F9;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    padding: 10px;
+    height: 64px;
+}
+
+.edit-myclass{
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    background: #5294FF;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    transition: transform .1s ease, box-shadow .1s ease;
+    height: 64px;
+    padding: 10px;
+}
+
+.edit-myclass:active{
+    box-shadow: 0 0 #111;
+    transform: translate(4px, 4px);
+}
+
+/* Pantalla de inicio */
+
+.main-hero{
+    background-image: linear-gradient(90deg, #80808033 1px, #0000 0), linear-gradient(#80808033 1px, #0000 0);
+    background-size: 70px 70px;
+    background-color: #FFE0E0;
+}
+
+.hero-text-intro{
+    padding: 100px 50px;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 25px;
+    text-align: center;
+    display: flex;
+    gap: 50px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-text-intro span{
+    background: #FF4D5080;
+    padding: 0 8px;
+    border: 2px solid #00000066;
+    border-radius: 5px;
+    font-weight: 700 !important;
+}
+
+.hero-text-intro h1{
+    width: 700px;
+}
+
+.hero-text-intro p{
+    width: 75%;
+    line-height: 50px;
+    font-size: 1.5rem;
+}
+
+.hero-text-intro p b{
+    font-size: 30px;
+    background: #FF4D50;
+    border: 2px solid #111;
+    padding: 5px 10px;
+    box-shadow: 4px 4px #111;
+}
+
+.hero-text-intro a{
+    display: flex;
+    font-weight: bold;
+    align-items: center;
+    background: #FF4D50;
+    border: 2px solid #111;
+    padding: 10px 20px;
+    font-size: 22px;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    transition: box-shadow .1s ease, transform .1s ease;
+}
+
+.hero-text-intro a:active{
+    box-shadow: 0 0 #111;
+    transform: translate(4px, 4px);
+}
+
+/* Login */
+
+.login-main{
+    overflow-y: hidden;
+    display: flex;
+    padding: 50.5px 0px;
+    justify-content: center;
+    background: #F9F9F9;
+    background-image: linear-gradient(90deg, #80808033 1px, #0000 0), linear-gradient(#80808033 1px, #0000 0);
+    background-size: 40px 40px;
+}
+
+.login-inner{
+    padding: 50px;
+    background: #FFE0E0 !important;
+    border: 2px solid #111;
+    box-shadow: 4px 4px #111;
+    border-radius: 5px;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    background: #FFF;
+    width: 40%;
+    gap: 20px;
+}
+
+.login-header h1{
+    font-size: 16px;
+}
+
+.login-header p{
+    font-weight: normal;
+}
+
+.email-input, .password-input{
+    display: flex;
+    font-weight: bold;
+    gap: 5px;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.email-input input, .password-input input{
+    padding: 10px 50px 10px 10px;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.email-input input{
+    padding: 10px !important;
+}
+
+.email-input input::placeholder, .password-input input::placeholder{
+    color: #999;
+}
+
+.email-input input:focus-within{
+    outline: 2px solid #FFF;
+    box-shadow: 0 0 0 4px #111;
+}
+
+.password-field button{
+    display: flex;
+    background: #FFF;
+    align-items: center;
+    position: absolute;
+    margin-left: 398px;
+    border-radius: 0 5px 5px 0;
+    margin-top: -44px;
+    border: 2px solid #111;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.password-field:focus-within{
+    outline: 2px solid #FFF;
+    box-shadow: 0 0 0 4px #111;
+    border-radius: 5px;
+}
+
+.password-label{
+    display: flex;
+    justify-content: space-between;
+}
+
+.password-label a{
+    font-weight: normal;
+    color: #111;
+    text-decoration: none;
+}
+
+.password-label a:hover{
+    text-decoration: underline;
+}
+
+.login-buttons button{
+    cursor: pointer;
+    font-weight: bold;
+    font-family: 'TTNorms', sans-serif;
+    width: 100%;
+    background: #FF4D50;
+    border: 2px solid #111;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+    box-shadow: 4px 4px #111;
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+
+.login-buttons button:active{
+    box-shadow: 0 0 #111;
+    transform: translate(4px, 4px);
+}
+
+.link-register{
+    display: flex;
+    justify-content: center;
+}
+
+.link-register a{
+    color: #111;
+}
+
+/* Pantalla de registro/creacion */
+
+.register-main{
+    overflow-y: hidden;
+    display: flex;
+    padding: 46px 0px;
+    justify-content: center;
+    background: #F9F9F9;
+    background-image: linear-gradient(90deg, #80808033 1px, #0000 0), linear-gradient(#80808033 1px, #0000 0);
+    background-size: 40px 40px;
+}
+
+.register-container{
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    justify-content: center;
+}
+
+.register-help{
+    font-family: 'TTNorms', sans-serif;
+    width: 35%;
+    background: #FFE0E0;
+    padding: 50px;
+    border: 2px solid #111;
+    box-shadow: 4px 4px #111;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+
+.register-help div{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.register-help ul{
+    margin-left: 20px;
+}
+
+.register-help ul li a{
+    color: #111;
+    font-weight: 800;
+}
+
+.register-inner{
+    font-family: 'TTNorms', sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: #FFE0E0;
+    padding: 50px;
+    width: 35%;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+}
+
+.register-show-password{
+    margin-left: 306px !important;
+}
+
+.register-password-field:focus-within{
+    margin-right: 0px;
+}
+
+/* Dashboard del director/vice/secretario */
+
+.table-actions-principal{
+    display: flex;
+    margin-bottom: -1px;
+    align-items: center;
+    gap: 10px;
+}
+
+.table-actions-principal button{
+    display: flex;
+    align-items: center;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    gap: 5px;
+    padding: 5px 10px;
+    font-weight: bold;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+}
+
+.principal-table-border{
+    display: flex;
+    justify-content: center;
+    max-height: 434px;
+    width: 95%;
+    overflow-y: auto;
+    border: 2px solid #111;
+    border-right: 4px solid #111;
+}
+
+.add-student{
+    display: flex;
+    width: 30% !important;
+    align-items: center;
+    gap: 15px;
+    justify-content: center;
+    background: #04E17A;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+
+.add-student:active{
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 #111;
+}
+
+.delete-student{
+    display: flex;
+    width: 35% !important;
+    align-items: center;
+    gap: 15px;
+    justify-content: center;
+    background: #FF4D50;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+
+.delete-student:active{
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 #111;
+}
+
+.principal-dashboard-main{
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 19.5px 0;
+    background-color: #FFE0E0;
+    background-image: linear-gradient(90deg,#8080804d 1px,#0000 0),linear-gradient(#80808090 1px,#0000 0);
+    background-size: 40px 40px;
+}
+
+.principal-table{
+    width: 100%;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    border-collapse: collapse;
+    background: #F9F9F9;
+}
+
+.principal-table thead{
+    color: #111;
+    text-align: left;
+}
+
+.principal-table thead tr{
+    outline: 2px solid #111;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.principal-table thead tr th{
+    padding: 10px;
+    background: #F9F9F9;
+    z-index: 100;
+}
+
+.principal-table tbody tr td{
+    padding: 10px;
+    border-bottom: 2px solid #111;
+}
+
+.principal-search-inner{
+    display: flex;
+    justify-content: space-between;
+    width: 95%;   
+}
+
+.principal-checkbox-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-top: 5px;
+}
+
+.principal-checkbox-wrapper input {
+  position: absolute;
+  opacity: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+.principal-checkbox-wrapper input:checked + .custom-checkbox {
+  background: #5294FF;
+}
+
+.principal-checkbox-wrapper input:checked + .custom-checkbox::after {
+  display: block;
+}
+
+/* Datos del alumno y padres */
+
+.student-info-main{
+    font-family: 'TTNorms', sans-serif;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 50px;
+    padding: 19.5px 0;
+    background-color: #FFE0E0;
+    background-image: linear-gradient(90deg,#8080804d 1px,#0000 0),linear-gradient(#80808090 1px,#0000 0);
+    background-size: 40px 40px;   
+}
+
+.student-info-inner{
+    background: #FFF;
+    border: 2px solid #111;
+    box-shadow: 4px 4px #111;
+    border-radius: 5px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-direction: column;
+    width: 35%;
+}
+
+.student-info-inner h1{
+    font-size: 16px;
+}
+
+.student-info-inner div{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.student-info-inner div input{
+    padding: 10px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    font-size: 16px;
+    background: #FFF;
+    transition: border .1s ease, background .1s ease;
+}
+
+.student-info-inner div input:focus-within{
+    outline: 2px solid #FFF;
+    box-shadow: 0 0 0 4px #111;
+}
+
+.student-info-inner div input:disabled{
+    border: 2px solid #F9F9F9;
+    background: #F9F9F9;
+    cursor: not-allowed;
+}
+
+.student-info-inner div label{
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.student-info-inner div select{
+    padding: 10px;
+    font-size: 16px;
+    background: #FF4D50;
+    border: 2px solid #111;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.student-info-inner div select:disabled{
+    border: 2px solid #F9F9F9;
+    cursor: not-allowed;
+}
+
+.retire-auth{
+    flex-direction: row !important;
+    justify-content: space-between;
+}
+
+.parent-info-inner{
+    background: #FFF;
+    border: 2px solid #111;
+    box-shadow: 4px 4px #111;
+    border-radius: 5px;
+    padding: 20px;
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+    width: 35%;
+}
+
+.parent-info-inner h1{
+    font-size: 16px;
+}
+
+.parent-info-inner div{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.parent-info-inner div input{
+    padding: 10px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border .1s ease, background .1s ease;
+}
+
+.parent-info-inner div input:focus-within{
+    outline: 2px solid #FFF;
+    box-shadow: 0 0 0 4px #111;
+}
+
+.parent-info-inner div input:disabled{
+    border: 2px solid #F9F9F9;
+    background: #F9F9F9;
+    cursor: not-allowed;
+}
+
+.parent-info-inner div textarea{
+    border: 2px solid #111;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+    font-family: 'TTNorms', sans-serif;
+    resize: vertical;
+    min-height: 44px;
+    height: 44px;
+}
+
+.parent-info-inner div textarea:focus-within{
+    outline: 2px solid #FFF;
+    box-shadow: 0 0 0 4px #111;
+}
+
+.parent-info-inner div textarea::-webkit-scrollbar-track{
+    border-radius: 0px 5px 5px 0px;
+    border-left: 2px solid #111;
+    cursor: default;
+}
+
+.parent-info-inner div textarea::-webkit-scrollbar-thumb{
+    cursor: pointer;
+}
+
+::-webkit-resizer{
+    background-color: transparent;
+    background-image: url(../assets/chevron-down.svg);
+    background-size: contain;
+    border-left: 2px solid #111;
+    border-top: 2px solid #111;
+}
+
+.parent-info-inner div textarea:disabled{
+    cursor: not-allowed;
+}
+
+.parent-info-inner div label{
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.si-action-inner{
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.si-action-inner button{
+    border: 2px solid #111;
+    box-shadow: 4px 4px #111;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+
+.si-action-inner button:active{
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 #111;
+}
+
+.si-save{
+    background: #04C86D;
+}
+.si-allow-edit{
+    background: #5294FF;
+}
+
+.si-delete{
+    background: #FF4D50;
+}
+
+/* Mis clases */
+
+.my-classes{
+    display: flex;
+    justify-content: center;
+    padding: 46px 0px 196.5px;
+    gap: 50px;
+    background: #FFE0E0;
+    background-image: linear-gradient(90deg, #80808033 1px, #0000 0), linear-gradient(#80808033 1px, #0000 0);
+    background-size: 40px 40px; 
+    height: 100%;  
+}
+
+.my-classes-inner{
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.my-classes-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.class{
+    font-family: 'TTNorms', sans-serif;
+    background: #FF4D50;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    gap: 10px;
+}
+
+.class-card-header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.class-card-header h1{
+    white-space: nowrap;
+    font-size: 16px;
+    width: 100%;
+    text-align: center;
+}
+
+.class-card-header a{
+    color: #111;
+    text-decoration: none;
+    background: #F9F9F9;
+    height: 30px;
+    padding: 0 5px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-bottom: -2px;
+    border: 2px solid #111;
+    border-radius: 5px;
+}
+
+.checkbox-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin-top: 5px;
+}
+
+.checkbox-wrapper input {
+    cursor: pointer;
+  position: absolute;
+  opacity: 0;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+}
+
+.custom-checkbox {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #111;
+  background: #FFF;
+  pointer-events: none;
+  transition: background .1s ease;
+  pointer-events: none;
+}
+
+.custom-checkbox::after {
+  content: "";
+  margin-left: -2px;
+  width: 20px;
+  height: 20px;
+  mask: url(../assets/check.svg);
+  background: black;
+  display: none;
+}
+
+.checkbox-wrapper input:checked + .custom-checkbox {
+  background: #5294FF;
+}
+
+.checkbox-wrapper input:checked + .custom-checkbox::after {
+  display: block;
+}
+
+.class-edit{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.class-edit a{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background: #5294FF;
+    border: 2px solid #111;
+    border-radius: 5px;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    font-family: 'TTNorms', sans-serif;
+    box-shadow: 4px 4px #111;
+    transition: transform .1s ease, box-shadow .1s ease;
+    cursor: pointer;
+    color: #111;
+    text-decoration: none;
+}
+
+.class-edit button:active{
+    box-shadow: 0 0 #111;
+    transform: translate(4px, 4px);
+}
+
+.my-classes-header{
+    font-family: 'TTNorms', sans-serif;
+}
+
+.my-classes-inner-action{
+    display: flex;
+    justify-content: space-between;
+}
+
+.my-classes-search{
+    display: flex;
+    gap: 25px;
+    width: 50%;
+}
+
+.my-classes-search button{
+    background: #5294FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 10%;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.my-classes-search input{
+    padding: 10px;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    width: 75%;
+}
+
+.my-classes-search input:focus-within{
+    outline: 2px solid #FFF;
+    box-shadow: 0 0 0 4px #111;
+}
+
+.my-classes-buttons{
+    display: flex;
+    gap: 25px;
+    width: 50%;
+    justify-content: flex-end;
+}
+
+.my-classes-buttons button, .my-classes-buttons a{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;    
+    border: 2px solid #111;
+    box-shadow: 4px 4px #111;
+    cursor: pointer;
+    border-radius: 5px;
+    font-family: 'TTNorms', sans-serif;
+    font-weight: bold;
+    font-size: 16px;
+    text-decoration: navajowhite;
+    color: #000;
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+
+.my-classes-buttons button:active, .my-classes-buttons a:active{
+    box-shadow: 0 0 #111;
+    transform: translate(4px, 4px);
+}
+
+.new-class{
+    width: 25%;
+    background: #5294FF;
+}
+
+.delete-selected-class{
+    background: #FF4D50;
+    width: 30%;
+}
+
+/* Crear clase */
+
+.create-class-main{
+    background-color: #FFE0E0;
+    background-image: linear-gradient(90deg,#8080804d 1px,#0000 0),linear-gradient(#80808090 1px,#0000 0);
+    background-size: 40px 40px;
+    display: flex;
+    justify-content: center;
+    padding: 75px 0;
+}
+
+.create-class-inner{
+    background: #FFF;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    gap: 10px;
+    width: 35%;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+}
+
+.create-class-inner label{
+    font-weight: bold;
+}
+
+.create-class-inner h1{
+    font-size: 16px;
+}
+
+.create-class-inner input{
+    padding: 10px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    font-size: 16px;
+    font-family: 'TTNorms', sans-serif;
+}
+
+.create-class-inner input:focus-within{
+    outline: 2px solid #FFF;
+    box-shadow: 0 0 0 4px #111;
+}
+
+.class-name{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.class-course{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.o, .a{
+    display: flex;
+    width: 50%;
+    align-items: center;
+    font-family: 'TTNorms', sans-serif;
+    color: #111;
+    font-weight: bold;
+}
+
+.o select:focus-visible, .a select:focus-visible{
+    outline: none !important;
+}
+
+.o{
+    border-right: 2px solid #111;
+}
+.o p{
+    height: fit-content;
+    margin: auto;
+    width: 75%;
+    text-align: center;
+}
+
+.o select{
+    background: #FF4D50;
+    height: 39px;
+    width: 50%;
+    text-align: center;
+    border: none;
+    appearance: none;
+    border-right: 2px solid #111;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.a .custom-select{
+    width: 50%;
+}
+
+.a select option{
+    color: #111;
+}
+
+.a p{
+    height: fit-content;
+    margin: auto;
+}
+
+.center{
+    display: flex;
+    justify-content: space-between;
+    border: 2px solid #111;
+    border-radius: 5px;
+    background: #FF4D50;
+}
+
+.lab-group{
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+}
+
+.lab-number{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 2px solid #111;
+    border-radius: 5px;
+    background: #FF4D50;
+}
+
+.lab-number button{
+    border-right: none;
+    border-left: 2px solid #111;
+    width: 100%;
+    border-radius: 0 5px 5px 0;
+}
+
+.lab-number select:focus-visible{
+    outline: none;
+}
+
+.lab-number div input{
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    text-align: center;
+    width: fit-content;
+    color: #111;
+    font-weight: bold;
+}
+
+.mujajaja{
+    width: 10%;
+}
+
+.class-quantity{
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+}
+
+.quadrimester{
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+}
+
+.quadrimester .custom-select{
+    width: 100%;
+}
+
+.quadrimester button{
+    border-radius: 5px;
+    border: 2px solid #111;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.lab-checkbox{
+    display: flex;
+    gap: 25px;
+}
+
+.class-button{
+    width: 100%;
+}
+
+.class-button button{
+    cursor: pointer;
+    background: #FF4D50;
+    font-family: 'TTNorms', sans-serif;
+    font-weight: bold;
+    font-size: 16px;
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #111;
+    box-shadow: 4px 4px #111;
+    border-radius: 5px;
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+
+.class-button button:active{
+    box-shadow: 0 0 #111;
+    transform: translate(4px, 4px);
+}
+
+.larger{
+    width: 32% !important;
+}
