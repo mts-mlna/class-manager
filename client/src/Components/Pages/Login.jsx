@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from "../../context/AuthContext";
+import { logIn } from '../../backend/auth.api';
 
 function Login() {
 
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [msg, setMsg] = useState('');
   const [error, setError] = useState("");
 
-  // Evitar espacios
   const preventSpaces = (e) => {
     if (e.key === " ") e.preventDefault();
   };
@@ -21,7 +20,6 @@ function Login() {
     e.target.value = e.target.value.replace(/\s+/g, "").toLowerCase();
   };
 
-  // Validación de contraseña
   const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()\-_+=\{\}\[\]:;,.?\/\\|~`]+$/;
 
   function handlePasswordChange(e) {
@@ -31,30 +29,44 @@ function Login() {
     }
   }
 
-  // 🔹 LOGIN USANDO AUTHCONTEXT
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
+    setMsg('');
 
-    const res = await login(email, password);
-
-    if (res.error || res.message) {
-      setError(res.error || res.message);
+    if (!email || !password) {
+      setError('Debes ingresar tu correo electrónico y contraseña para iniciar sesión.');
       return;
     }
 
-    navigate("/classes");
-  }
+    try {
+      const data = await logIn(email, password);
+
+      setMsg(data.mensaje || 'Inicio de sesión exitoso.');
+      navigate('/dashboard');
+
+    } catch (err) {
+      setError(
+        err.response?.data?.Error ||
+        err.response?.data?.error ||
+        'No se pudo iniciar sesión. Intenta nuevamente.'
+      );
+    }
+  };
 
   return (
     <main className="login-main">
+      {error && (
+        <div className='alert-error'>
+          <h1><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F9F9F9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>¡Error!</h1>
+          <p>{error}</p>
+        </div>
+      )}
       <form className="login-inner" onSubmit={handleSubmit}>
         <div className="login-header">
           <h1>Inicia sesión en tu cuenta</h1>
           <p>Ingresa tu mail debajo para iniciar sesión en tu cuenta</p>
         </div>
-
-        {/* Email */}
         <div className="email-input">
           <label>Correo Electrónico</label>
           <input
@@ -66,14 +78,11 @@ function Login() {
             onInput={cleanSpaces}
           />
         </div>
-
-        {/* Password */}
         <div className="password-input">
           <div className="password-label">
             <label>Contraseña</label>
             <Link>¿Olvidaste tu contraseña?</Link>
           </div>
-
           <div className="password-field">
             <input
               type={showPassword ? "text" : "password"}
@@ -103,15 +112,6 @@ function Login() {
             </button>
           </div>
         </div>
-
-        {/* Error */}
-        {error && (
-          <p className="error-msg" style={{ color: "red", marginTop: "5px" }}>
-            {error}
-          </p>
-        )}
-
-        {/* Botones */}
         <div className="login-buttons">
           <button type="submit">Iniciar sesión</button>
         </div>

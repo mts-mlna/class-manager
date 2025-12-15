@@ -1,29 +1,19 @@
-const cookieParser = require("cookie-parser");
-
 const Express = require('express');
-const App = Express();
-const Cors = require('cors');
+const app = Express(); 
+const cors = require('cors')
+app.use(Express.json())
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}))
 
 require('dotenv').config();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
-App.use(cookieParser());
+const Routes = require('./src/Routes/Login.Routes')
+app.use('/api', Routes)
 
-// CORS + credenciales para cookies
-App.use(Cors({
-    origin: "http://localhost:5173",
-    credentials: true
-}));
-
-// Para JSON
-App.use(Express.json());
-
-// Rutas
-const RutasLogin = require('./src/Router/Login.Router');
-App.use('/api', RutasLogin);
-App.use("/api/clases", require("./src/Router/Class.Router"));
-
-App.listen(PORT,()=>{
-console.log(`🚀 http://localhost:${PORT}`);
+app.listen(PORT, () => {
+    console.log(`🚀 http://localhost:${PORT}`);
 });

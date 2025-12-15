@@ -1,9 +1,17 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { signUp } from '../../backend/auth.api';
 
 function Signup() {
 
   const [showPassword, setShowPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState('');
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("")
+  const [error, setError] = useState('')
+  const [msg, setMsg] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
 
   const navigate = useNavigate();
 
@@ -16,70 +24,97 @@ function Signup() {
   };
 
   const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()\-_+=\{\}\[\]:;,.?\/\\|~`]+$/;
+  const minLengthRegex = /.{8,}/;
+  const uppercaseRegex = /[A-Z]/;
+  const numberRegex = /[0-9]/;
+  const specialCharRegex = /[!@#$%^&*()\-_+=\{\}\[\]:;,.?\/\\|~`]/;
 
   function handlePasswordChange(e) {
     const value = e.target.value;
+
     if (value === "" || passwordRegex.test(value)) {
-      setPassword(value); 
+      setPassword(value);
     }
   }
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("")
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
-  const [showPopup, setShowPopup] = useState(false)
+  function validatePassword(password) {
+    if (password.length < 8) {
+      return 'La contraseña debe tener al menos 8 caracteres.';
+    }
 
-  async function handleSignup(e) {
+    if (!/[A-Z]/.test(password)) {
+      return 'La contraseña debe tener al menos una letra mayúscula.';
+    }
+
+    if (!/[0-9]/.test(password)) {
+      return 'La contraseña debe tener al menos un número.';
+    }
+
+    if (!/[!@#$%^&*()\-_+=\{\}\[\]:;,.?\/\\|~`]/.test(password)) {
+      return 'La contraseña debe tener al menos un carácter especial.';
+    }
+
+    return '';
+  }
+
+  const handleClosePopup = () => {
+    setShowPopup(false); // oculta el popup
+    navigate('/login'); // redirige al login
+  };
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
 
-    if (password !== password2) {
-      setError("Las contraseñas no coinciden");
+    setError('')
+    setPasswordError('')
+
+    const passwordValidationError = validatePassword(password);
+
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError);
       return;
     }
 
+    if (password !== password2) {
+      setPasswordError('Las contraseñas no coinciden.');
+      return;
+    }
+    setPasswordError('');
+
     try {
-      const res = await fetch("http://localhost:3000/api/registrar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          Correo: email,
-          Contraseña: password
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.mensaje || "Error registrando usuario");
-        return;
-      }
-
-      // Registro exitoso
-      setSuccess("Registro completado.");
-
-      // Limpia los campos
-      setEmail("");
-      setPassword("");
-      setPassword2("");
-
-      // ⏳ Espera 1 segundo para mostrar el mensaje (opcional)
-      setTimeout(() => {
-        navigate("/");   // 🔥 Redirección al inicio
-      }, 800);
-
+      const data = await signUp(email, password);
+      setMsg(data.mensaje);
+      setShowPopup(true)
     } catch (err) {
-      console.error(err);
-      setError("No se pudo conectar con el servidor");
+      setError('Error al registrar usuario');
     }
   }
-
   return (
     <main className='register-main'>
-      <form className="register-container" onSubmit={handleSignup}>
+      {error && (
+        <div className='alert-error'>
+          <h1><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F9F9F9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>¡Error!</h1>
+          <p>{error}</p>
+        </div>
+      )}
+      {passwordError && (
+        <div className='alert-error'>
+          <h1><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F9F9F9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>¡Error!</h1>
+          <p>{passwordError}</p>
+        </div>
+      )}
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <h1>Cuenta creada</h1>
+            <p>{msg}</p>
+            <button onClick={handleClosePopup}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+      <form className="register-container" onSubmit={handleSubmit}>
         <div className="register-help">
           <h1>Crea una cuenta nueva</h1>
           <div>
@@ -95,7 +130,7 @@ function Signup() {
         <div className="register-inner">
           <div className='email-input'>
             <label htmlFor="">Correo electrónico</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={preventSpaces} onInput={cleanSpaces} placeholder='nombre@empresa.com' />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={preventSpaces} onInput={cleanSpaces} placeholder='nombre@empresa.com' required />
           </div>
           <div className='password-input'>
             <label htmlFor="">Contraseña</label>
@@ -112,7 +147,7 @@ function Signup() {
             </div>
           </div>
           <div className='login-buttons'>
-            <button type='submit'>Registrarme</button>
+            <button type='submit' onSubmit={handleSubmit}>Registrarme</button>
           </div>
           <div className='link-register'>
             <p>¿Ya tienes cuenta? <Link to="/login">¡Inicia sesión!</Link></p>

@@ -8,12 +8,12 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-async function enviarCorreoVerificacion(correo, token) {
-    const enlace = `http://localhost:3000/api/verificar/${token}`;
+async function sendVerification(email, token) {
+    const enlace = `http://localhost:3000/api/verify/${token}`;
 
     await transporter.sendMail({
         from: `"Class Manager" <${process.env.EMAIL}>`,
-        to: correo,
+        to: email,
         subject: "Último paso: Verifica tu cuenta ahora",
         html: `
             <div style="margin: 0; padding: 0; background-image: linear-gradient(90deg, #80808033 1px, #0000 0), linear-gradient(#80808033 1px, #0000 0); background-size: 40px 40px; background-color: #FFE0E0; border: 2px solid #111; padding: 50px; align-items: center; gap: 25px;">
@@ -34,4 +34,4 @@ async function enviarCorreoVerificacion(correo, token) {
     });
 }
 
-module.exports = { enviarCorreoVerificacion };
+module.exports = { sendVerification };

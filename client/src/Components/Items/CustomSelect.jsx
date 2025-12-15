@@ -24,6 +24,7 @@ export default function CustomSelect({ options, value, placeholder, onChange, di
   return (
     <div className="custom-select" ref={ref}>
         <button
+            type="button"
             className={`select-button ${disabled ? "disabled" : ""}`}
             onClick={() => !disabled && setOpen(!open)}
             disabled={disabled}

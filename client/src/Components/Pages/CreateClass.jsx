@@ -142,66 +142,11 @@ function CreateClass() {
 
   const grupoTaller = noAplica ? null : `${labInputValue}${labValue}`;
 
-  // ------------------------------
-  //   C A R G A R   U S U A R I O
-  // ------------------------------
-  const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    fetch("http://localhost:3000/api/auth/me", {
-      credentials: "include"
-    })
-      .then(res => res.json())
-      .then(data => {
-        setUser(data.user || null);
-      })
-      .catch(() => setUser(null));
-  }, []);
-
-  const profesorId = user ? user.Id : null;
-
-  const crearClase = async () => {
-    if (!profesorId) {
-      alert("Error: No se pudo obtener la sesión del profesor.");
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const response = await fetch("http://localhost:3000/api/clases/crear", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          NombreMateria: nombreMateria,
-          Curso: cursoFinal,
-          GrupoTaller: grupoTaller,
-          Cuatrimestre: nivelValue,
-          ProfesorId: profesorId,
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.mensaje || "Error al crear clase");
-        return;
-      }
-
-      alert("Clase creada con éxito!");
-
-    } catch (error) {
-      console.error(error);
-      alert("Error de servidor");
-    }
-  };
 
   return (
     <main className='create-class-main'>
-      <div className='create-class-inner'>
+      <form className='create-class-inner'>
         <div><h1>Crear una clase nueva</h1></div>
         <div className='class-name'>
           <label htmlFor="">Nombre de la materia</label>
@@ -213,7 +158,7 @@ function CreateClass() {
             <div className='o'>
               <CustomSelect
                 options={courseOptions}
-                value={courseOValue}                 // value controlado
+                value={courseOValue}
                 onChange={(opt) => setCourseOValue(String(opt.value))}
                 placeholder="-"
               />
@@ -259,9 +204,9 @@ function CreateClass() {
           />
         </div>
         <div className='class-button'>
-          <button onClick={crearClase}>Crear clase</button>
+          <button type='submit'>Crear clase</button>
         </div>
-      </div>
+      </form>
     </main>
   )
 }

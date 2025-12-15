@@ -1,13 +1,10 @@
 import React, { useState } from 'react'
-import Layouts from './Components/Layouts'
-import { AuthProvider } from "./context/AuthContext";
+import Layouts from './Components/Layouts'  
 
 function App() {
 
   return (
-    <AuthProvider>
-      <Layouts />
-    </AuthProvider>
+    <Layouts />
   )
 }
 

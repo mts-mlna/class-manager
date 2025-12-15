@@ -1,152 +1,117 @@
-const db = require('../database/DataBase')
-const { EncriptarPassword, CompararPassword } = require('../utils/PasswordHash');
-const crypto = require("crypto");
-const { enviarCorreoVerificacion } = require("../utils/Email")
-const jwt = require("jsonwebtoken")
+const db = require('../DataBase/db')
+const { genToken } = require('../Utils/Token')
+const { sendVerification } = require('../Utils/Email')
+const encryption = require('bcryptjs')
 
-const RegistrarUsuario = async (req, res) => {
-    try {
-        const { Correo, Contraseña } = req.body;
-
-        if (!Correo || !Contraseña) {
-            return res.status(400).json({ mensaje: "Faltan datos obligatorios" });
+const SignUp = (req, res) => {
+    try{
+        const {email, password} = req.body;
+        if (!email || !password){
+            return res.status(400).json({Error: 'Faltan datos obligatorios para completar el registro'})
         }
 
-        const Nombre = Correo.split("@")[0];
-        const Rol = "Desconocido";
+        const username = email.split('@')[0]
 
-        db.get("SELECT * FROM Usuario WHERE Correo = ?", [Correo], async (error, fila) => {
-            if (error) return res.status(500).json({ Error: "Error del servidor" });
-
-            if (fila) {
-                return res.status(400).json({ mensaje: "El usuario ya existe" });
+        const querycheck = `SELECT * FROM Usuarios WHERE email = ?`
+        db.get(querycheck, [email], async (err, user) => {
+            if (err) {
+                console.error('Error durante la verificación.', err)
+                return res.status(404).json({Error: 'Ocurrió un problema al verificar tu información. Asegúrate que tus datos sean correctos o intenta de nuevo más tarde.'})
+            }
+            if (user) {
+                return res.status(409).json({Error: 'Este correo electrónico ya le pertenece a otra cuenta. Si es tuyo, intenta iniciar sesión o recuperar tu contraseña. De lo contrario, utiliza otro correo electrónico.'});
             }
 
-            const Hash = await EncriptarPassword(Contraseña);
-
-            // generar token único
-            const TokenVerificacion = crypto.randomBytes(32).toString("hex");
-
-            const Insertar = `
-                INSERT INTO Usuario (Nombre, Correo, Contraseña, Rol, Verificado, TokenVerificacion)
-                VALUES (?, ?, ?, ?, 0, ?)
+            const hash = encryption.hashSync(password, 10)
+            const token = genToken(email)
+            const query = `
+                INSERT INTO Usuarios (username, email, password, tokenEmail)
+                VALUES (?, ?, ?, ?)
             `;
 
-            db.run(Insertar, [Nombre, Correo, Hash, Rol, TokenVerificacion], async function (err) {
+            db.run(query, [username, email, hash, token], async (err) => {
                 if (err) {
-                    console.log(err);
-                    return res.status(500).json({ mensaje: "Error al registrar usuario" });
+                    console.error('Error durante algo.', err)
+                    return res.status(500).json({ error: 'No se pudo crear la cuenta en este momento. Te recomendamos intentar nuevamente más tarde.', detalle: err.message })
                 }
-
-                // ENVIAR CORREO
-                await enviarCorreoVerificacion(Correo, TokenVerificacion);
-
+                await sendVerification(email, token)
                 return res.status(201).json({
-                    mensaje: "Usuario registrado. Revisa tu email para verificar tu cuenta."
-                });
-            });
-        });
+                    mensaje: 'Se te ha enviado un email para confirmar tu cuenta. Una vez lo hayas hecho, podrás iniciar sesión sin problemas.'
+                })
+            })
+        })
 
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ mensaje: "Error del servidor" });
+    } catch(err) {
+        console.error('ERROR EN SIGNUP:', err);
+        return res.status(500).json({
+            error: 'Ocurrió un problema inesperado en el servidor. Por favor, intenta nuevamente en unos minutos. Si el problema persiste, contacta a un administrador.',
+            detalle: err.message
+        });
     }
-};
+}
 
-const VerificarCuenta = (req, res) => {
-    const { token } = req.params;
+const LogIn = (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-    const BuscarToken = `SELECT * FROM Usuario WHERE TokenVerificacion = ?`;
-
-    db.get(BuscarToken, [token], (err, usuario) => {
-        if (err) return res.status(500).json({ mensaje: "Error del servidor" });
-        if (!usuario) return res.status(400).json({ mensaje: "Token inválido" });
-
-        const Verificar = `
-            UPDATE Usuario 
-            SET Verificado = 1, TokenVerificacion = NULL
-            WHERE Id = ?
-        `;
-
-        db.run(Verificar, [usuario.Id], (err2) => {
-            if (err2) return res.status(500).json({ mensaje: "Error al activar la cuenta" });
-
-            return res.send(`<h1>Cuenta verificada con éxito ✔</h1>`);
-        });
-    });
-};
-
-const IniciarSesion = (req, res) => {
-    const { Correo, Contraseña } = req.body;
-
-    if (!Correo || !Contraseña) {
-        return res.status(400).json({ mensaje: 'Faltan datos obligatorios' });
+    // 1️⃣ Verificar datos
+    if (!email || !password) {
+      return res.status(400).json({
+        Error: 'Debes ingresar tu correo electrónico y contraseña para iniciar sesión.'
+      });
     }
 
-    const Consulta = `SELECT * FROM Usuario WHERE Correo = ?`;
+    // 2️⃣ Buscar usuario por email
+    const query = 'SELECT * FROM Usuarios WHERE email = ?';
 
-    db.get(Consulta, [Correo], async (error, usuario) => {
-        if (error) {
-            console.error('❌ Error al iniciar sesión:', error.message);
-            return res.status(500).json({ Error: 'Error del servidor' });
-        }
-
-        if (!usuario) {
-            return res.status(400).json({ mensaje: 'Usuario no encontrado' });
-        }
-
-        const valido = await CompararPassword(Contraseña, usuario.Contraseña);
-
-        if (!valido) {
-            return res.status(400).json({ mensaje: 'Contraseña incorrecta' });
-        }
-
-        // 🔥 Generar JWT
-        const token = jwt.sign(
-            {
-                id: usuario.Id,
-                nombre: usuario.Nombre,
-                correo: usuario.Correo,
-                rol: usuario.Rol
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: "7d" }
-        );
-
-        // 🔥 Guardarlo en una cookie
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: false, // cambiar a true en producción
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000
+    db.get(query, [email], async (err, user) => {
+      if (err) {
+        console.error('Error al buscar el usuario:', err);
+        return res.status(500).json({
+          Error: 'Ocurrió un problema al intentar iniciar sesión. Intenta nuevamente más tarde.'
         });
+      }
 
-        return res.status(200).json({
-            mensaje: 'Inicio de sesión exitoso',
-            usuario: {
-                id: usuario.Id,
-                nombre: usuario.Nombre,
-                correo: usuario.Correo,
-                rol: usuario.Rol
-            }
+      // 3️⃣ Usuario no existe
+      if (!user) {
+        return res.status(401).json({
+          Error: 'El correo electrónico o la contraseña son incorrectos.'
         });
+      }
+
+      // 4️⃣ Cuenta no verificada
+      if (!user.verificado) {
+        return res.status(403).json({
+          Error: 'Tu cuenta aún no fue verificada. Revisa tu correo electrónico y confirma tu cuenta.'
+        });
+      }
+
+      // 5️⃣ Comparar contraseñas
+      const passwordMatch = await encryption.compare(password, user.password);
+
+      if (!passwordMatch) {
+        return res.status(401).json({
+          Error: 'El correo electrónico o la contraseña son incorrectos.'
+        });
+      }
+
+      // 6️⃣ Login exitoso
+      return res.status(200).json({
+        mensaje: 'Inicio de sesión exitoso.',
+        usuario: {
+          id: user.id,
+          username: user.username,
+          email: user.email
+        }
+      });
     });
+
+  } catch (err) {
+    console.error('ERROR EN LOGIN:', err);
+    return res.status(500).json({
+      Error: 'Ocurrió un problema inesperado en el servidor. Intenta nuevamente más tarde.'
+    });
+  }
 };
 
-const ListarUsuarios = (req, res) => {
-    db.all('SELECT * FROM Usuario', [], (error, filas) => {
-        if (error) return res.status(500).json({ Error: 'Error al listar usuarios' });
-        res.status(200).json({ Usuarios: filas });
-    });
-};
-
-const EliminarUsuario = (req, res) => {
-    const { id } = req.params;
-
-    db.run('DELETE FROM Usuario WHERE Id = ?', [id], function (error) {
-        if (error) return res.status(500).json({ Error: 'Error al eliminar usuario' });
-        res.status(200).json({ mensaje: 'Usuario eliminado con éxito' });
-    });
-};
-
-module.exports = { RegistrarUsuario, IniciarSesion, ListarUsuarios, EliminarUsuario, VerificarCuenta };
+module.exports = { SignUp, LogIn }
