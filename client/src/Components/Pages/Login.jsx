@@ -41,9 +41,11 @@ function Login() {
 
     try {
       const data = await logIn(email, password);
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('user', JSON.stringify(data.usuario));
 
       setMsg(data.mensaje || 'Inicio de sesión exitoso.');
-      navigate('/dashboard');
+      navigate('/classes');
 
     } catch (err) {
       setError(

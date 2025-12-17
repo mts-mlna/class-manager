@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom';
+import { getClassById, createAlumno } from '../../backend/auth.api';
 import '../Layouts.css'
 
 function Table() {
+
+  const { id } = useParams()
+  const navigate = useNavigate();
+  const [clase, setClase] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
+  const [dni, setDni] = useState('');
 
   const [students, setStudents] = useState([
     {
@@ -167,6 +179,44 @@ function Table() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const fetchClass = async () => {
+      try {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        const data = await getClassById(id, token);
+        setClase(data.clase);
+      } catch (err) {
+        console.error('ERROR GET CLASS:', err);
+
+        if (err.response?.status === 401) {
+          setError('Tu sesión expiró. Vuelve a iniciar sesión.');
+        } else if (err.response?.status === 404) {
+          setError('La clase no existe o no tienes acceso.');
+        } else {
+          setError('Error al cargar la clase.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClass();
+  }, [id, navigate]);
+
+  if (loading) {
+    return <p>Cargando clase...</p>;
+  }
+
+  if (error) {
+    return <p className="alert-error">{error}</p>;
+  }
+
 
   return (
     <main className='dashboard-main'>
@@ -181,13 +231,17 @@ function Table() {
       </>
       <section className='my-class'>
         <div className='my-class-inner'>
-          <h1>PDISC</h1>
+          <h1>{clase.nombre}</h1>
+          <div className='date-hour'>
+            <p>Curso: {clase.curso}</p>
+            <p>Taller: {clase.taller}</p>
+          </div>
           <div className='date-hour'>
             <p>Fecha: {now.toLocaleDateString()}</p>
             <p>Hora: {now.toLocaleTimeString()}</p>
           </div>
           <div className='date-hour'>
-            <p>Cuatrimestre: 2</p>
+            <p>Cuatrimestre: {clase.cuatrimestre}</p>
           </div>
         </div>
       </section>
@@ -199,7 +253,7 @@ function Table() {
           </div>
           <div className='header-actions'>
             <button className='erase-selection'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>Eliminar selección</button>
-            <button className='save-changes larger'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>Agregar alumno</button>
+            <button className='save-changes larger' onClick={() => setShowPopup(true)}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>Agregar alumno</button>
             <button className='save-changes' onClick={handleClickSave}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>Guardar</button>
           </div>
         </div>
@@ -264,7 +318,54 @@ function Table() {
         </div>
       </div>
       )}
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup-alumnos">
+            <h1>Agregar alumno</h1>
 
+            {error && <p className="alert-error">{error}</p>}
+
+            <div className="popup-form">
+              <input
+                type="text"
+                placeholder="Nombre"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="Apellido"
+                value={apellido}
+                onChange={(e) => setApellido(e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="DNI (opcional)"
+                value={dni}
+                onChange={(e) => setDni(e.target.value)}
+              />
+            </div>
+
+            <div className="popup-buttons">
+              <button
+                className="cancel"
+                onClick={() => {
+                  setShowPopup(false);
+                  setError('');
+                }}
+              >
+                Cancelar
+              </button>
+
+              <button className="confirm">
+                Añadir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

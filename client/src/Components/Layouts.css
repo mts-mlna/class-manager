@@ -1302,7 +1302,7 @@ header{
 .my-classes{
     display: flex;
     justify-content: center;
-    padding: 46px 0px 196.5px;
+    padding: 46px 0px 380.5px;
     gap: 50px;
     background: #FFE0E0;
     background-image: linear-gradient(90deg, #80808033 1px, #0000 0), linear-gradient(#80808033 1px, #0000 0);
@@ -1526,8 +1526,11 @@ header{
     background-image: linear-gradient(90deg,#8080804d 1px,#0000 0),linear-gradient(#80808090 1px,#0000 0);
     background-size: 40px 40px;
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
     padding: 75px 0;
+    gap: 10px;
 }
 
 .create-class-inner{
@@ -1806,4 +1809,11 @@ input::-webkit-inner-spin-button {
 
 .popup p{
     text-align: left;
+}
+
+.popup-alumnos{
+    animation: select-enter 150ms ease-out;
+    background: #FFE0E0;
+    height: fit-content;
+    padding: 20px;
 }

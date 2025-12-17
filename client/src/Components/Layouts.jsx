@@ -16,11 +16,12 @@ function Layouts() {
         <Header />
         <Routes>
           <Route path='/' element={<Home/>}/>
-          <Route path='/Table' element={<Table/>}/>
+          <Route path='/class/:id' element={<Table/>}/>
           <Route path='/login' element={<Login/>}/>
           <Route path='/signup' element={<Signup/>}/>
           <Route path='/classes' element={<Classes/>}/>
           <Route path='/classes/new' element={<CreateClass/>}/>
+          <Route path="/classes/edit/:id" element={<CreateClass />} />
         </Routes>
       </Router>
     </>

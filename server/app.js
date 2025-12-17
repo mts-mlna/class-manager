@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 const Routes = require('./src/Routes/Login.Routes')
 app.use('/api', Routes)
+app.use('/api', require('./src/Routes/Class.Routes'))
 
 app.listen(PORT, () => {
     console.log(`🚀 http://localhost:${PORT}`);

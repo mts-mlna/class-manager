@@ -1,5 +1,5 @@
 const db = require('../DataBase/db')
-const { genToken } = require('../Utils/Token')
+const { genEmailToken, genLoginToken } = require('../Utils/Token')
 const { sendVerification } = require('../Utils/Email')
 const encryption = require('bcryptjs')
 
@@ -23,7 +23,7 @@ const SignUp = (req, res) => {
             }
 
             const hash = encryption.hashSync(password, 10)
-            const token = genToken(email)
+            const token = genEmailToken(email)
             const query = `
                 INSERT INTO Usuarios (username, email, password, tokenEmail)
                 VALUES (?, ?, ?, ?)
@@ -95,9 +95,12 @@ const LogIn = (req, res) => {
         });
       }
 
+      const token = genLoginToken(user)
+
       // 6️⃣ Login exitoso
       return res.status(200).json({
         mensaje: 'Inicio de sesión exitoso.',
+        token,
         usuario: {
           id: user.id,
           username: user.username,

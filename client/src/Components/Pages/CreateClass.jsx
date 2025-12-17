@@ -1,6 +1,8 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import CustomSelect from '../Items/CustomSelect';
+import { createClass, updateClass, getClassById } from '../../backend/auth.api';
+import { useNavigate, useParams } from 'react-router-dom'
 
 function CreateClass() {
 
@@ -8,6 +10,11 @@ function CreateClass() {
   const [courseAValue, setCourseAValue] = useState("");
   const [labSelectValue, setLabSelectValue] = useState("");
   const [nombreMateria, setNombreMateria] = useState("");
+  const [error, setError] = useState('');
+  const [msg, setMsg] = useState('');
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
 
   // --- R E S T R I C C I O N E S  ---
   const restricciones = {
@@ -142,12 +149,97 @@ function CreateClass() {
 
   const grupoTaller = noAplica ? null : `${labInputValue}${labValue}`;
 
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  setError('');
+  setMsg('');
+
+  if (!nombreMateria || !courseOValue || !courseAValue || !nivelValue) {
+    setError('Debes completar todos los campos obligatorios.');
+    return;
+  }
+
+  const curso = `${courseOValue}º${courseAValue}ª`;
+  const taller = noAplica ? null : `${courseOValue}.${labValue}`;
+
+  const token = localStorage.getItem('token');
+
+  try {
+    if (isEdit) {
+      await updateClass(
+        id,
+        {
+          nombre: nombreMateria,
+          curso,
+          taller,
+          cuatrimestre: nivelValue
+        },
+        token
+      );
+      setMsg('Clase actualizada correctamente.');
+    } else {
+      await createClass(
+        {
+          nombre: nombreMateria,
+          curso,
+          taller,
+          cuatrimestre: nivelValue
+        },
+        token
+      );
+      setMsg('Clase creada correctamente.');
+    }
+
+    navigate('/classes');
+
+  } catch (err) {
+    setError('Error al guardar la clase.');
+  }
+};
+
+useEffect(() => {
+  if (!isEdit) return;
+
+  const fetchClass = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const { clase } = await getClassById(id, token);
+
+      setNombreMateria(clase.nombre);
+
+      // curso "7º2ª"
+      const [o, a] = clase.curso.split(/[ºª]/).filter(Boolean);
+      setCourseOValue(o);
+      setCourseAValue(a);
+
+      // taller "7.4" o null
+      if (clase.taller) {
+        const [, lab] = clase.taller.split('.');
+        setLabValue(lab);
+        setNoAplica(false);
+      } else {
+        setNoAplica(true);
+      }
+
+      setNivelValue(clase.cuatrimestre);
+
+    } catch (err) {
+      setError('No se pudo cargar la clase.');
+    }
+  };
+
+  fetchClass();
+}, [id]);
+
 
 
   return (
     <main className='create-class-main'>
-      <form className='create-class-inner'>
-        <div><h1>Crear una clase nueva</h1></div>
+      {error && <p className="alert-error">{error}</p>}
+      {msg && <p className="alert-success">{msg}</p>}
+      <form className='create-class-inner' onSubmit={handleSubmit}>
+        <div><h1>{isEdit ? 'Editar clase' : 'Crear una clase nueva'}</h1></div>
         <div className='class-name'>
           <label htmlFor="">Nombre de la materia</label>
           <input type="text" value={nombreMateria} onChange={(e) => setNombreMateria(e.target.value)}/>
@@ -204,7 +296,7 @@ function CreateClass() {
           />
         </div>
         <div className='class-button'>
-          <button type='submit'>Crear clase</button>
+          <button type='submit'>{isEdit ? 'Guardar cambios' : 'Crear clase'}</button>
         </div>
       </form>
     </main>

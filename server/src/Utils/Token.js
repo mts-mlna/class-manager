@@ -1,12 +1,44 @@
-const jwt = require('jsonwebtoken')
-require('dotenv').config()
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
-function genToken(email){
-    return jwt.sign({email}, process.env.JWT_SECRET, {expiresIn:"1h"})
-}
+/* ===============================
+   TOKEN DE VERIFICACIÓN DE EMAIL
+================================ */
 
-function verToken(tokenEmail){
-    return jwt.verify(tokenEmail, process.env.JWT_SECRET)
-}
+const genEmailToken = (email) => {
+  return jwt.sign(
+    { email },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+};
 
-module.exports = {genToken, verToken}
+const verifyEmailToken = (token) => {
+  return jwt.verify(token, process.env.JWT_SECRET);
+};
+
+/* ===============================
+   TOKEN DE LOGIN (SESIÓN)
+================================ */
+
+const genLoginToken = (user) => {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: '2h' }
+  );
+};
+
+const verifyLoginToken = (token) => {
+  return jwt.verify(token, process.env.JWT_SECRET);
+};
+
+module.exports = {
+  genEmailToken,
+  verifyEmailToken,
+  genLoginToken,
+  verifyLoginToken
+};
