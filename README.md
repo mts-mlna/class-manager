@@ -28,10 +28,24 @@ Class Manager es una aplicación web diseñada para facilitar el proceso de toma
 # Clonar el repositorio
 git clone https://github.com/tu-usuario/class-manager.git
 
-# Instalar dependencias necesarias
+# Abrir la terminal con CRTL+Ñ
+
+# Instalar dependencias necesarias en la carpeta padre
 npm install
 
-# Como el proyecto cuenta con concurrently, ejecutar el siguiente script en la carpeta padre:
+# Navegar hacia la carpeta de Client e instalar sus dependencias
+cd Client
+npm install
+
+# Navegar hacia la carpeta de Server e instalar sus dependencias
+cd ..
+cd Server
+npm install
+
+# Volver hacia la carpeta padre
+cd ..
+
+# Ejecutar el siguiente comando en la carpeta padre. Esto ejecutará ambos front y backend al mismo tiempo
 npm run dev
 
 # Luego de unos instantes, se abrirá en el navegador automáticamente el localhost del frontend
