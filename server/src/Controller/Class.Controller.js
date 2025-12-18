@@ -1,4 +1,4 @@
-const db = require('../DataBase/db');
+import db from '../DataBase/db.js'
 
 const CreateClass = (req, res) => {
   try {
@@ -232,7 +232,7 @@ const createAlumno = (req, res) => {
   try {
     const { id } = req.params;        // id de la clase
     const userId = req.user.id;       // profesor logueado
-    const { nombre, apellido, dni } = req.body;
+    const { nombre, apellido, dni, genero } = req.body;
 
     if (!nombre || !apellido) {
       return res.status(400).json({
@@ -261,13 +261,13 @@ const createAlumno = (req, res) => {
 
       // 2️⃣ Insertar alumno
       const insertQuery = `
-        INSERT INTO alumnos (nombre, apellido, dni, id_clase)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO alumnos (nombre, apellido, genero, dni, id_clase)
+        VALUES (?, ?, ?, ?, ?)
       `;
 
       db.run(
         insertQuery,
-        [nombre, apellido, dni || null, id],
+        [nombre, apellido, genero, dni || null, id],
         function (err) {
           if (err) {
             console.error(err);
@@ -292,4 +292,223 @@ const createAlumno = (req, res) => {
   }
 };
 
-module.exports = { CreateClass, GetClasses, DeleteClass, UpdateClass, getClassById, createAlumno };
+const getAlumnosByClase = (req, res) => {
+  try {
+    const { id } = req.params;   // id_clase
+    const userId = req.user.id; // profesor autenticado
+
+    // 1️⃣ Obtener alumnos de la clase
+    const alumnosQuery = `
+      SELECT 
+        a.id,
+        a.nombre,
+        a.apellido,
+        a.dni,
+        a.genero
+      FROM alumnos a
+      INNER JOIN clases c ON a.id_clase = c.id
+      WHERE a.id_clase = ?
+        AND c.id_profesor = ?
+      ORDER BY a.apellido, a.nombre
+    `;
+
+    db.all(alumnosQuery, [id, userId], (err, alumnos) => {
+      if (err) {
+        console.error('DB ERROR alumnos:', err);
+        return res.status(500).json({ error: 'Error al obtener alumnos' });
+      }
+
+      // 2️⃣ Total de clases con asistencia tomada
+      const totalClasesQuery = `
+        SELECT COUNT(*) AS totalClases
+        FROM asistencias_clase
+        WHERE id_clase = ?
+          AND id_profesor = ?
+      `;
+
+      db.get(totalClasesQuery, [id, userId], (err, totalRow) => {
+        if (err) {
+          console.error('DB ERROR totalClases:', err);
+          return res.status(500).json({ error: 'Error al obtener total de clases' });
+        }
+
+        const totalClases = totalRow?.totalClases || 0;
+
+        // 3️⃣ Asistencias por alumno
+        const alumnosPromises = alumnos.map(alumno => {
+          return new Promise((resolve, reject) => {
+            const asistenciasAlumnoQuery = `
+              SELECT COUNT(*) AS asistenciasAlumno
+              FROM asistencias_alumnos aa
+              INNER JOIN asistencias_clase ac
+                ON aa.id_asistencia_clase = ac.id
+              WHERE ac.id_clase = ?
+                AND ac.id_profesor = ?
+                AND aa.id_alumno = ?
+                AND aa.presente = 1
+            `;
+
+            db.get(
+              asistenciasAlumnoQuery,
+              [id, userId, alumno.id],
+              (err, row) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve({
+                    ...alumno,
+                    asistenciasAlumno: row?.asistenciasAlumno || 0,
+                    totalClases
+                  });
+                }
+              }
+            );
+          });
+        });
+
+        Promise.all(alumnosPromises)
+          .then(alumnosFinal => {
+            res.status(200).json({ alumnos: alumnosFinal });
+          })
+          .catch(err => {
+            console.error('DB ERROR asistenciasAlumno:', err);
+            res.status(500).json({ error: 'Error al obtener asistencias' });
+          });
+      });
+    });
+  } catch (err) {
+    console.error('ERROR getAlumnosByClase:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+const updateAlumno = (req, res) => {
+  try {
+    const { id } = req.params; // id del alumno
+    const { nombre, apellido, dni, genero } = req.body;
+
+    if (!nombre || !apellido) {
+      return res.status(400).json({
+        Error: 'Nombre y apellido son obligatorios'
+      });
+    }
+
+    const query = `
+      UPDATE alumnos
+      SET nombre = ?, apellido = ?, dni = ?, genero = ?
+      WHERE id = ?
+    `;
+
+    db.run(
+      query,
+      [nombre, apellido, dni || null, genero || null, id],
+      function (err) {
+        if (err) {
+          console.error('DB ERROR updateAlumno:', err);
+          return res.status(500).json({
+            Error: 'Error al actualizar el alumno'
+          });
+        }
+
+        if (this.changes === 0) {
+          return res.status(404).json({
+            Error: 'Alumno no encontrado'
+          });
+        }
+
+        return res.json({
+          mensaje: 'Alumno actualizado correctamente'
+        });
+      }
+    );
+  } catch (err) {
+    console.error('ERROR updateAlumno:', err);
+    return res.status(500).json({
+      Error: 'Error interno del servidor'
+    });
+  }
+};
+
+const deleteAlumnos = (req, res) => {
+  try {
+    const { alumnosIds } = req.body;
+
+    if (!Array.isArray(alumnosIds) || alumnosIds.length === 0) {
+      return res.status(400).json({
+        Error: 'No se seleccionaron alumnos'
+      });
+    }
+
+    const placeholders = alumnosIds.map(() => '?').join(',');
+
+    const query = `
+      DELETE FROM alumnos
+      WHERE id IN (${placeholders})
+    `;
+
+    db.run(query, alumnosIds, function (err) {
+      if (err) {
+        console.error('DB ERROR deleteAlumnos:', err);
+        return res.status(500).json({
+          Error: 'Error al eliminar alumnos'
+        });
+      }
+
+      return res.json({
+        mensaje: 'Alumnos eliminados correctamente',
+        eliminados: this.changes
+      });
+    });
+  } catch (err) {
+    console.error('ERROR deleteAlumnos:', err);
+    return res.status(500).json({
+      Error: 'Error interno del servidor'
+    });
+  }
+};
+
+export const createAsistenciaClase = (req, res) => {
+  const userId = req.user.id;
+  const { id_clase, fecha, hora, alumnos } = req.body;
+  // alumnos = [{ id: 1, presente: true }, ...]
+
+  if (!id_clase || !fecha || !hora || !Array.isArray(alumnos)) {
+    return res.status(400).json({ error: 'Datos incompletos' });
+  }
+
+  db.run(
+    `INSERT INTO asistencias_clase (id_clase, id_profesor, fecha, hora)
+     VALUES (?, ?, ?, ?)`,
+    [id_clase, userId, fecha, hora],
+    function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Error creando asistencia' });
+      }
+
+      const asistenciaClaseId = this.lastID;
+
+      const stmt = db.prepare(
+        `INSERT INTO asistencias_alumnos
+         (id_asistencia_clase, id_alumno, presente)
+         VALUES (?, ?, ?)`
+      );
+
+      alumnos.forEach(alumno => {
+        stmt.run(
+          asistenciaClaseId,
+          alumno.id,
+          alumno.presente ? 1 : 0
+        );
+      });
+
+      stmt.finalize();
+
+      res.status(201).json({
+        mensaje: 'Asistencia guardada correctamente'
+      });
+    }
+  );
+};
+
+export { CreateClass, GetClasses, DeleteClass, UpdateClass, getClassById, createAlumno, getAlumnosByClase, updateAlumno, deleteAlumnos };

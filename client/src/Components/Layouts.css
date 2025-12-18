@@ -383,6 +383,10 @@ header{
     border-bottom: 2px solid #111;
 }
 
+.professor-table-assistance tbody{
+    min-height: 1200px;
+}
+
 .professor-checkbox-wrapper {
   position: relative;
   display: inline-block;
@@ -460,7 +464,7 @@ header{
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 10px 0 265px;
+    padding: 10px 0 323.5px;
     background-color: #FFE0E0;
     background-image: linear-gradient(90deg,#8080804d 1px,#0000 0),linear-gradient(#80808090 1px,#0000 0);
     background-size: 40px 40px;
@@ -1815,5 +1819,80 @@ input::-webkit-inner-spin-button {
     animation: select-enter 150ms ease-out;
     background: #FFE0E0;
     height: fit-content;
+    width: 40%;
     padding: 20px;
+    font-family: 'TTNorms', sans-serif;
+    border: 2px solid #111;
+    box-shadow: 4px 4px #111;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.popup-alumnos h1{
+    font-size: 18px;
+}
+
+.popup-alumnos label{
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.popup-form{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.popup-form div{
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+}
+
+.popup-form div input{
+    padding: 10px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    font-family: 'TTNorms', sans-serif;
+    font-size: 16px;
+}
+
+.popup-buttons{
+    display: flex;
+    justify-content: flex-end;
+    gap: 50px;
+}
+
+.popup-buttons .cancel{
+    background: #F9F9F9;
+}
+
+.popup-buttons button{
+    font-size: 16px;
+    font-weight: bold;
+    font-family: 'TTNorms', sans-serif;
+    padding: 10px 20px;
+    border: 2px solid #111;
+    border-radius: 5px;
+    box-shadow: 4px 4px #111;
+    transition: transform .1s ease, box-shadow .1s ease;
+}
+
+.popup-buttons .confirm{
+    background: #FF4D50;
+}
+
+.gender-select{
+    width: 100%;
+}
+
+.gender-select .custom-select{
+    width: 100%;
+}
+
+.gender-select .custom-select .select-button{
+    border-radius: 5px;
+    border: 2px solid #111;
 }

@@ -1,101 +1,39 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
-import { getClassById, createAlumno } from '../../backend/auth.api';
+import { getClassById, createAlumno, getAlumnosByClase, updateAlumno, deleteAlumnos, createAsistencia } from '../../backend/auth.api';
+import CustomSelect from '../Items/CustomSelect';
 import '../Layouts.css'
 
 function Table() {
 
-  const { id } = useParams()
+  const { id } = useParams();
   const navigate = useNavigate();
+
   const [clase, setClase] = useState(null);
-  const [error, setError] = useState('');
+  const [alumnos, setAlumnos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  /* popup alumno */
   const [showPopup, setShowPopup] = useState(false);
+  const [isEditAlumno, setIsEditAlumno] = useState(false);
+  const [alumnoEditId, setAlumnoEditId] = useState(null);
+
+  /* form alumno */
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [dni, setDni] = useState('');
+  const [genderValue, setGenderValue] = useState('');
 
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      nombre: "Sánchez, Bruno Ezequiel",
-      curso: "7º2ª",
-      grupo: "7.4",
-      asistencia: "Ausente",
-      checked: false
-    },
-    {
-      id: 2,
-      nombre: "Torres, Antu Paladea",
-      curso: "7º1ª",
-      grupo: "7.4",
-      asistencia: "Ausente",
-      checked: false
-    },
-    {
-      id: 3,
-      nombre: "Molina, Matias Ezequiel",
-      curso: "7º4ª",
-      grupo: "7.4",
-      asistencia: "Ausente",
-      checked: false
-    },
-    {
-      id: 4,
-      nombre: "López, Alexis",
-      curso: "7º4ª",
-      grupo: "7.4",
-      asistencia: "Ausente",
-      checked: false
-    },
-    {
-      id: 5,
-      nombre: "Mamani, Romina Karen",
-      curso: "7º4ª",
-      grupo: "7.4",
-      asistencia: "Ausente",
-      checked: false
-    },
-    {
-      id: 6,
-      nombre: "Alegre, Luciana",
-      curso: "7º4ª",
-      grupo: "7.4",
-      asistencia: "Ausente",
-      checked: false
-    },
-    {
-      id: 7,
-      nombre: "Cánchez, Bruno Ezequiel",
-      curso: "7º4ª",
-      grupo: "7.4",
-      asistencia: "Ausente",
-      checked: false
-    },
-    {
-      id: 8,
-      nombre: "Bánchez, Bruno Ezequiel",
-      curso: "7º4ª",
-      grupo: "7.4",
-      asistencia: "Ausente",
-      checked: false
-    },
-    {
-      id: 9,
-      nombre: "Ránchez, Bruno Ezequiel",
-      curso: "7º4ª",
-      grupo: "7.4",
-      asistencia: "Ausente",
-      checked: false
-    }
-  ]);
-
-  
+  const genderOptions = ["-", "M", "F", "X"].map(opt => ({
+    value: opt === "-" ? "" : opt,
+    label: opt
+  }));
 
   const [sortAsc, setSorcAsc] = useState(true);
 
   const handleSortByName = () => {
-    const sorted = [...students].sort((a, b) => {
+    const sorted = [...alumnos].sort((a, b) => {
       if (sortAsc){
         return a.nombre.localeCompare(b.nombre);
       } else {
@@ -103,17 +41,9 @@ function Table() {
       }
     });
 
-    setStudents(sorted);
+    setAlumnos(sorted);
     setSorcAsc(!sortAsc);
   };
-
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(null);
-
-  const handleClickSave = () => {
-    setConfirmAction("guardar")
-    setShowConfirm(true)
-  }
 
   const handleClickSP = () => {
     setConfirmAction("sp")
@@ -133,36 +63,27 @@ function Table() {
     setConfirmAction(null)
   }
 
-  const handleMarkPresent = (id) => {
-    setStudents(prev => {
-      const updated = prev.map(student =>
-        student.id === id ? { ...student, checked: !student.checked } : student
-      );
-      setFilteredStudents(filtered =>
-        filtered.map(student =>
-          student.id === id ? { ...student, checked: !student.checked } : student
-        )
-      );
-
-      return updated;
-    });
+  const handleMarkPresent = (idAlumno) => {
+    setAlumnos(prev =>
+      prev.map(a =>
+        a.id === idAlumno ? { ...a, checked: !a.checked } : a
+      )
+    );
   };
 
-
   useEffect(() => {
-    const sorted = [...students].sort((a, b) => 
+    const sorted = [...alumnos].sort((a, b) => 
       a.nombre.localeCompare(b.nombre)
     );
-    setStudents(sorted);
+    setAlumnos(sorted);
   }, []);
 
   const [searchText, setSearchText] = useState("");
-  const [filteredStudents, setFilteredStudents] = useState(students);
 
   const handleSearch = () => {
     const texto = searchText.toLowerCase();
 
-    const resultado = students.filter((alumno) =>
+    const resultado = alumnos.filter((alumno) =>
       alumno.nombre.toLowerCase().includes(texto)
     );
 
@@ -209,14 +130,146 @@ function Table() {
     fetchClass();
   }, [id, navigate]);
 
-  if (loading) {
-    return <p>Cargando clase...</p>;
-  }
+  const handleAddAlumno = async () => {
+    setError('');
 
-  if (error) {
-    return <p className="alert-error">{error}</p>;
-  }
+    if (!nombre || !apellido) {
+      setError('Nombre y apellido son obligatorios.');
+      return;
+    }
 
+    try {
+      const token = localStorage.getItem('token');
+
+      await createAlumno(
+        id, // 👈 id de la clase (useParams)
+        { nombre, apellido, dni, genero: genderValue },
+        token
+      );
+
+      // limpiar
+      setNombre('');
+      setApellido('');
+      setDni('');
+      setGenderValue('');
+      setShowPopup(false);
+      await fetchAlumnos()
+
+      // (opcional luego) recargar alumnos
+    } catch (err) {
+      console.error(err);
+      setError('Error al agregar alumno.');
+    }
+  };
+
+  const fetchAlumnos = async () => {
+    const token = localStorage.getItem('token');
+    const data = await getAlumnosByClase(id, token);
+    setAlumnos(data.alumnos.map(a => ({ ...a, checked: false })));
+  };
+
+  useEffect(() => {
+    const fetchClass = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return navigate('/login');
+
+        const data = await getClassById(id, token);
+        setClase(data.clase);
+        await fetchAlumnos();
+      } catch {
+        setError('Error al cargar la clase.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClass();
+  }, [id, navigate]);
+
+  /* =========================
+     CRUD ALUMNOS
+  ========================== */
+  const handleNewAlumno = () => {
+    setIsEditAlumno(false);
+    setAlumnoEditId(null);
+    setNombre('');
+    setApellido('');
+    setDni('');
+    setGenderValue('');
+    setShowPopup(true);
+  };
+
+  const handleEditAlumno = (alumno) => {
+    setIsEditAlumno(true);
+    setAlumnoEditId(alumno.id);
+    setNombre(alumno.nombre);
+    setApellido(alumno.apellido);
+    setDni(alumno.dni || '');
+    setGenderValue(alumno.genero || '');
+    setShowPopup(true);
+  };
+
+  const handleSubmitAlumno = async () => {
+    if (!nombre || !apellido) {
+      setError('Nombre y apellido son obligatorios.');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+
+    if (isEditAlumno) {
+      await updateAlumno(
+        alumnoEditId,
+        { nombre, apellido, dni, genero: genderValue },
+        token
+      );
+    } else {
+      await createAlumno(
+        id,
+        { nombre, apellido, dni, genero: genderValue },
+        token
+      );
+    }
+
+    setShowPopup(false);
+    await fetchAlumnos();
+  };
+
+  const handleDeleteSelection = async () => {
+    const ids = alumnos.filter(a => a.checked).map(a => a.id);
+    if (ids.length === 0) return;
+
+    const token = localStorage.getItem('token');
+    await deleteAlumnos(ids, token);
+    await fetchAlumnos();
+  };
+
+  const handleGuardarAsistencia = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      const payload = {
+        id_clase: id,
+        fecha: now.toISOString().split('T')[0],
+        hora: now.toTimeString().split(' ')[0],
+        alumnos: alumnos.map(a => ({
+          id: a.id,
+          presente: !!a.checked
+        }))
+      };
+
+      await createAsistencia(id, payload, token);
+
+      alert('Asistencia guardada correctamente');
+    } catch (err) {
+      console.error(err);
+      setError('Error al guardar asistencia');
+    }
+  };
+
+  if (loading) return <p>Cargando clase...</p>;
+  if (error) return <p className="alert-error">{error}</p>;
 
   return (
     <main className='dashboard-main'>
@@ -252,9 +305,9 @@ function Table() {
             <button onClick={handleSearch}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
           </div>
           <div className='header-actions'>
-            <button className='erase-selection'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>Eliminar selección</button>
-            <button className='save-changes larger' onClick={() => setShowPopup(true)}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>Agregar alumno</button>
-            <button className='save-changes' onClick={handleClickSave}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>Guardar</button>
+            <button className='erase-selection' onClick={handleDeleteSelection}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>Eliminar selección</button>
+            <button className='save-changes larger' onClick={handleNewAlumno}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>Agregar alumno</button>
+            <button className='save-changes' onClick={handleGuardarAsistencia}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>Guardar</button>
           </div>
         </div>
       </section>
@@ -264,8 +317,6 @@ function Table() {
             <thead>
               <tr>
                 <th>
-                  <label className='checkbox-wrapper'>
-                  </label>
                 </th>
                 <th className='student-name-header'>
                   <button onClick={handleSortByName}>
@@ -280,21 +331,21 @@ function Table() {
               </tr>
             </thead>
             <tbody>
-              {students.map(student => (
-              <tr key={filteredStudents.id}>
+              {alumnos.map(alumno => (
+              <tr key={alumno.id}>
                 <td>
                   <label className='professor-checkbox-wrapper'>
-                    <input type="checkbox" checked={student.checked} onChange={() => handleMarkPresent(student.id)} />
+                    <input type="checkbox" checked={alumno.checked} onChange={() => handleMarkPresent(alumno.id)} />
                     <span className='custom-checkbox'></span>
                   </label>
                 </td>
-                <td><span>{student.nombre}</span></td>
-                <td>M</td>
-                <td>25/33</td>
-                <td>75%</td>
+                <td><span>{alumno.apellido}, {alumno.nombre}</span></td>
+                <td>{alumno.genero}</td>
+                <td>{alumno.asistenciasAlumno}/{alumno.totalClases}</td>
+                <td>{alumno.totalClases > 0 ? Math.round((alumno.asistenciasAlumno / alumno.totalClases) * 100) : 0}%</td>
                 <td className='table-actions'>
-                  <button className='present' onClick={() => handleMarkPresent(student.id)} ><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Presente</button>
-                  <button className='options'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>Editar</button>
+                  <button className='present' onClick={() => handleMarkPresent(alumno.id)} ><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Presente</button>
+                  <button className='options' onClick={() => handleEditAlumno(alumno)}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>Editar</button>
                 </td>
               </tr>
               ))}
@@ -302,64 +353,46 @@ function Table() {
           </table>
         </div>
       </section>
-      {showConfirm && (
-      <div className="popup-overlay">
-        <div className="popup">
-          <h2>¿Confirmar acción?</h2>
-          <p>
-            {confirmAction === "guardar" && "Al confirmar esta acción se guardarán las asistecias e inasistencias. ¿Estás seguro?"}
-            {confirmAction === "sp" && "Al confirmar esta acción se te marcará como ausente. Esta clase será eliminada del total de clases del cuatrimestre (pasarán a ser 32 en vez de 33). ¿Quieres continuar?"}
-          </p>
-
-          <div className="popup-buttons">
-            <button onClick={handleConfirm} className='popup-confirm'>Confirmar</button>
-            <button onClick={() => setShowConfirm(false)} className='popup-cancel'>Cancelar</button>
-          </div>
-        </div>
-      </div>
-      )}
       {showPopup && (
         <div className="popup-overlay">
           <div className="popup-alumnos">
-            <h1>Agregar alumno</h1>
-
+            <h1>{isEditAlumno ? 'Editar alumno' : 'Agregar alumno'}</h1>
             {error && <p className="alert-error">{error}</p>}
-
             <div className="popup-form">
-              <input
-                type="text"
-                placeholder="Nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-              />
-
-              <input
-                type="text"
-                placeholder="Apellido"
-                value={apellido}
-                onChange={(e) => setApellido(e.target.value)}
-              />
-
-              <input
-                type="text"
-                placeholder="DNI (opcional)"
-                value={dni}
-                onChange={(e) => setDni(e.target.value)}
-              />
+              <div>
+                <label htmlFor="">Nombre</label>
+                <input
+                  type="text"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="">Apellido</label>
+                <input
+                  type="text"
+                  value={apellido}
+                  onChange={(e) => setApellido(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="">DNI (Opcional)</label>
+                <input
+                  type="text"
+                  value={dni}
+                  onChange={(e) => setDni(e.target.value)}
+                />
+              </div>
+              <div className='gender-select'>
+                <label htmlFor="">Género</label>
+                <CustomSelect options={genderOptions} onChange={(opt) => setGenderValue(String(opt.value))} value={genderValue} placeholder="-"/>
+              </div>
             </div>
-
             <div className="popup-buttons">
-              <button
-                className="cancel"
-                onClick={() => {
-                  setShowPopup(false);
-                  setError('');
-                }}
-              >
+              <button className="cancel" onClick={() => setShowPopup(false)}>
                 Cancelar
               </button>
-
-              <button className="confirm">
+              <button className="confirm" type='submit' onClick={handleSubmitAlumno}>
                 Añadir
               </button>
             </div>
