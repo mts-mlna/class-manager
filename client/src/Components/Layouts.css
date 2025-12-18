@@ -1896,3 +1896,94 @@ input::-webkit-inner-spin-button {
     border-radius: 5px;
     border: 2px solid #111;
 }
+
+.messages-main{
+    background-color: #FFE0E0;
+    background-image: linear-gradient(90deg,#8080804d 1px,#0000 0),linear-gradient(#80808090 1px,#0000 0);
+    background-size: 40px 40px;
+}
+
+.messages-inner{
+    width: 50%;
+    border: 2px solid #111;
+    display: flex;
+    flex-direction: row;
+    font-family: 'TTNorms', sans-serif;
+    background: #F9F9F9;
+}
+
+.messages-aside{
+    border-right: 2px solid #111;
+    width: 30%;
+}
+
+.messages-chat{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.convo-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.convo-header h1{
+    font-size: 18px;
+}
+
+.convo-item{
+    display: flex;
+    flex-direction: column;
+    border-bottom: 2px solid #111;
+    padding: 10px;
+    background: #F9F9F9;
+}
+
+.convo-message{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chat-header{
+    border-bottom: 2px solid #111;
+    padding: 11px;
+}
+
+.chat-input{
+    width: 100%;
+    display: flex;
+
+}
+
+.chat-input input{
+    width: 90%;
+    padding: 10px;
+    border: none;
+    border-top: 2px solid #111;
+    font-size: 16px;
+}
+
+.chat-input input:focus-within{
+    outline: none;
+    box-shadow: none;
+}
+
+.chat-input button{
+    width: 10%;
+    border: none;
+    border-top: 2px solid #111;
+    border-left: 2px solid #111;
+    background: #FF4D50;
+    cursor: pointer;
+}
+
+.message.mine{
+    justify-content: flex-end;
+}
+
+.message.other{
+    justify-content: flex-start;
+}

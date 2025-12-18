@@ -24,6 +24,8 @@ function Table() {
   const [apellido, setApellido] = useState('');
   const [dni, setDni] = useState('');
   const [genderValue, setGenderValue] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
 
   const genderOptions = ["-", "M", "F", "X"].map(opt => ({
     value: opt === "-" ? "" : opt,
@@ -261,7 +263,8 @@ function Table() {
 
       await createAsistencia(id, payload, token);
 
-      alert('Asistencia guardada correctamente');
+      setSuccessMsg('Se han guardado las asistencias de esta clase correctamente.');
+      setShowSuccess(true);
     } catch (err) {
       console.error(err);
       setError('Error al guardar asistencia');
@@ -396,6 +399,19 @@ function Table() {
                 Añadir
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {showSuccess && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <p>{successMsg}</p>
+            <button
+              className="confirm"
+              onClick={() => setShowSuccess(false)}
+            >
+              Aceptar
+            </button>
           </div>
         </div>
       )}

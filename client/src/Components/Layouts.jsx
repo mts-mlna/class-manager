@@ -6,8 +6,8 @@ import Login from './Pages/Login'
 import Home from './Pages/Home'
 import Signup from './Pages/Signup'
 import Classes from './Pages/Classes'
-import StudentInfo from './Pages/StudentInfo'
 import CreateClass from './Pages/CreateClass'
+import Messaging from './Pages/Messaging'
 
 function Layouts() {
   return (
@@ -22,6 +22,7 @@ function Layouts() {
           <Route path='/classes' element={<Classes/>}/>
           <Route path='/classes/new' element={<CreateClass/>}/>
           <Route path="/classes/edit/:id" element={<CreateClass />} />
+          <Route path="/messages" element={<Messaging />} />
         </Routes>
       </Router>
     </>

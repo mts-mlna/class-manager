@@ -24,7 +24,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <nav className='sidebar-content'>
                     <ul>
                         {isLogged && (
-                            <li><Link to="/classes" onClick={onClose}>Mis cursos</Link></li>
+                            <>
+                                <li><Link to="/classes" onClick={onClose}>Mis cursos</Link></li>
+                            </>
                         )}
                         {!isLogged && (
                             <>
